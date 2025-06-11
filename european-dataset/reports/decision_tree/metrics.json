@@ -1,0 +1,8 @@
+{
+    "Accuracy": 0.9336734693877551,
+    "Precision": 0.9583333333333334,
+    "Recall": 0.9108910891089109,
+    "F1-score": 0.934010152284264,
+    "True Positives": 92.0,
+    "False Positives": 4.0
+}
