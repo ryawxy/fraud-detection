@@ -1,8 +1,8 @@
 {
-    "Accuracy": 0.9987170925450775,
-    "Precision": 0.6260869565217392,
-    "Recall": 0.7058823529411765,
-    "F1-score": 0.663594470046083,
-    "True Positives": 72.0,
-    "False Positives": 43.0
+    "Accuracy": 0.9984902215512096,
+    "Precision": 0.5384615384615384,
+    "Recall": 0.7938144329896907,
+    "F1-score": 0.6416666666666667,
+    "True Positives": 77.0,
+    "False Positives": 66.0
 }
