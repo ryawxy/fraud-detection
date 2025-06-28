@@ -1,0 +1,9 @@
+{
+    "Fraud Catching Rate": 0.7272727272727273,
+    "False Alarm Rate": 0.0001583809942806863,
+    "Balanced Classification Rate": 0.8635571731392233,
+    "Mathews Correlation Coefficient": 0.7913079822487546,
+    "True Positives": 56.0,
+    "False Positives": 9.0,
+    "F1-score": 0.7887323943661971
+}
