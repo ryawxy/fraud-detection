@@ -1,0 +1,10 @@
+dataset: S-FFSD
+test_size: 0.2
+trainfeature: /Users/raya/Desktop/fraud-detection/S-FFSD-dataset/data/processed/train_features.npy
+testfeature: /Users/raya/Desktop/fraud-detection/S-FFSD-dataset/data/processed/test_features.npy
+trainlabel: /Users/raya/Desktop/fraud-detection/S-FFSD-dataset/data/processed/train_labels.npy
+testlabel: /Users/raya/Desktop/fraud-detection/S-FFSD-dataset/data/processed/test_labels.npy
+epochs: 30
+batch_size: 512
+lr: 0.001
+device: cpu
