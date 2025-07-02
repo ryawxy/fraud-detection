@@ -9,3 +9,4 @@ xlrd~=2.0.2
 torch~=2.7.1
 torch-geometric~=2.6.1
 PyYAML~=6.0.2
+hidden_markov~=0.3.2
