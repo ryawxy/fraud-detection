@@ -37,7 +37,6 @@ class mcnn(nn.Module):
         )
 
     def forward(self, x: torch.Tensor):
-        # x shape be like: (batch_size, time_windows_dim, feat_dim)
         x_ = F.relu(self.conv1(x.unsqueeze(1)))
         x_ = self.flatten(self.maxpool1(self.conv2(x_)))
         logits = self.linears(x_)
