@@ -1,14 +1,11 @@
-from math import floor, ceil
+from math import ceil
 import numpy as np
-import pandas as pd
-from tqdm import tqdm
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, f1_score, average_precision_score
+from sklearn.metrics import roc_auc_score, f1_score, average_precision_score, \
+    recall_score
 import sys
-import os
-sys.path.append('/Users/raya/Desktop/fraud-detection/S-FFSD-dataset/model')
+
+sys.path.append('/S-FFSD-dataset/model')
 from cnn import mcnn, to_pred
 
 
@@ -80,5 +77,5 @@ def mcnn_main(
 
         true = test_label.cpu().numpy()
         pred = np.array(pred)
-        print(f"test set | auc: {roc_auc_score(true, pred):.4f}, F1: {f1_score(true, pred, average='macro'):.4f}, AP: {average_precision_score(true, pred):.4f}")
+        print(f"test set | auc: {roc_auc_score(true, pred):.4f}, F1: {f1_score(true, pred, average='macro'):.4f}, AP: {average_precision_score(true, pred):.4f}, Recall: {recall_score(true, pred, average='macro'):.4f}")
 

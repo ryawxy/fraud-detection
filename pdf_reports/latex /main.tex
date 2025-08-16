@@ -16,12 +16,10 @@
 
 \maketitle
 
-% Creating an abstract for a concise summary
 \begin{abstract}
-This paper presents the reproduction of experiments outlined in "Credit Card Fraud Detection using Machine Learning: A STUDY" by Tiwari et al\cite{tiwari2021credit}. We implemented a range of machine learning techniques to detect credit card fraud and evaluated their performance against the original findings, providing insights into their effectiveness and reproducibility.
+This paper presents the reproduction of experiments outlined in "Credit Card Fraud Detection using Machine Learning: A STUDY" by Tiwari et al\cite{tiwari2021credit}. We implemented a range of machine learning techniques to detect credit card fraud and evaluated their performance.
 \end{abstract}
 
-% Introducing the context and purpose
 \section{Introduction}
 \lettrine{C}{redit} cards play a crucial role in the modern world by simplifying transactions and enhancing convenience for consumers and businesses alike. However, this convenience comes with a significant drawback: credit card fraud poses a persistent and costly challenge to the financial industry. Each year, billions of dollars are lost globally due to fraudulent transactions, impacting financial institutions, merchants, and cardholders. As a result, developing effective methods to detect and prevent credit card fraud has become a pressing priority.
 
@@ -29,9 +27,8 @@ In this paper, we aim to reproduce the experiments reviewed in the study by Tiwa
 
 Reproducing these experiments, however, presents several challenges. One significant obstacle is the limited availability of real-world transaction data. Due to security and privacy concerns, financial institutions rarely release authentic datasets to the public, forcing researchers to rely on alternative sources. Additionally, fraud detection datasets are typically characterized by a severe class imbalance: legitimate transactions vastly outnumber fraudulent ones, often by a ratio of thousands to one. This imbalance complicates the task of accurately classifying fraudulent transactions, as machine learning models may become biased toward predicting transactions as legitimate. To overcome this, we employ data augmentation techniques and cost-sensitive algorithms designed to prioritize the detection of fraud, thereby improving model performance.
 
-For this study, we utilize multiple datasets, some of which are not derived from real transactions but are instead generated using data simulators. While these synthetic datasets enable us to test the machine learning approaches, they may not fully reflect the intricacies of actual fraud patterns encountered in practice. Despite this limitation, they offer a valuable means to assess the strengths and weaknesses of the techniques under investigation.
+For this study, we utilize multiple datasets, some of which are not derived from real transactions but are instead generated using data simulators. While these synthetic datasets enable us to test the machine learning approaches, they may not fully reflect the intricacies of actual fraud patterns encountered in practice.
 
-% Detailing the experimental setup
 \section{Methodology}
 
 \subsection{Experimental Datasets}
@@ -43,7 +40,6 @@ In this study, we utilized the following datasets to evaluate machine learning t
 
     \item \textbf{S-FFSD Dataset}: Simulated by F. Kang et al\cite{kang2018sffsd}. for their Convolutional Neural Network (CNN) experiment, this dataset includes key transaction features such as Time, Source, Target, Amount, Location, and Type.
 
-    \item \textbf{German Credit Dataset}: Hosted on the UCI Machine Learning Repository \cite{uci_german}, this dataset serves as a benchmark for credit risk prediction. It classifies individuals as good or bad credit risks based on personal attributes, including credit amount, marital status, and credit history. 
 \end{itemize}
 
 \subsection{Data Preprocessing}
@@ -67,7 +63,7 @@ Before analysis, the following steps were applied which are:
 We replicated the machine learning techniques evaluated in the original study:
 
 \paragraph{Hidden Markov Model (HMM).}
-A stochastic model that captures cardholder transaction sequences using hidden states to represent purchase types (e.g., low, medium, high price ranges). Implemented as described in \cite{srivastava2008credit} with three observation symbols, it detects deviations from typical spending behavior using Python’s hmmlearn library. Training was conducted offline, while detection occurred online, flagging fraudulent transactions to prevent processing and storing legitimate ones for future model updates. For our reproduction, we utilized an existing implementation available at \cite{khamesian_credit-card-fraud-detection}, which facilitated model setup and training, ensuring consistency with prior work.
+A stochastic model that captures cardholder transaction sequences using hidden states to represent purchase types (e.g., low, medium, high price ranges). Implemented as described in \cite{srivastava2008credit} with three observation symbols, it detects deviations from typical spending behavior using Python’s hmmlearn library. Training was conducted offline, while detection occurred online, flagging fraudulent transactions to prevent processing and storing legitimate ones for future model updates. For our reproduction, we utilized an existing implementation available at \cite{khamesian_credit-card-fraud-detection}.
     \paragraph{Decision Trees.} A supervised learning algorithm that recursively splits data into hierarchical nodes based on feature values to classify transactions as fraudulent or legitimate. Implemented using scikit-learn with pruning to prevent overfitting by removing low-impact branches, as described in \cite{tiwari2021credit}. A cost-sensitive approach was applied to address class imbalance, assigning higher penalties to misclassified fraudulent transactions to enhance detection performance.
     \paragraph{Logistic Regression.} 
 Logistic regression is a linear classification algorithm that models the probability of a transaction being fraudulent as a logistic (sigmoid) function of a weighted sum of the input features. Given an input vector $x$, the model computes the log-odds of the positive class as
@@ -132,8 +128,37 @@ After identifying the best hyperparameters, the model was retrained on the respe
 
 The KNN approach benefits from its straightforward implementation and interpretability but may be challenged by high-dimensional data and class imbalance. Using oversampling methods like SMOTE improved its performance by providing a more balanced representation of the minority fraud class during training.
 
+\paragraph{Bayesian Belief Network.}
+A Bayesian Belief Network (BBN) is a probabilistic graphical model that represents the dependencies among variables using a directed acyclic graph (DAG). Each node in the graph corresponds to a random variable, and edges represent conditional dependencies. BBNs are particularly well-suited for fraud detection problems because they can incorporate prior knowledge and handle uncertainty in predictions.
 
-% Presenting the experimental outcomes
+
+In our implementation, we first selected a subset of features from the European credit card fraud dataset, focusing on variables such as \texttt{V3}, \texttt{V4}, \texttt{V7}, \texttt{V10}, \texttt{V11}, \texttt{V12}, \texttt{V14}, \texttt{V16}, \texttt{V17}, and the \texttt{Amount} of the transaction, along with the target class label. These continuous features were discretized into five bins using the \texttt{KBinsDiscretizer} with a quantile strategy, enabling the Bayesian network to process them as categorical variables.
+
+We employed a Tree-Augmented Naive Bayes (TAN) structure learning algorithm with \texttt{V14} as the root node, as recommended in the literature for improved feature dependency modeling. The \texttt{pgmpy} library was used to estimate the network structure and fit the parameters using a Dirichlet prior with pseudo-count smoothing to avoid zero-probability issues.
+
+Once trained, inference was performed using Variable Elimination. For each transaction in the test set, the model calculated the posterior probability of the fraud class given the observed evidence (feature values). Transactions with a predicted probability above a threshold of 0.35 were classified as fraudulent. The threshold was chosen empirically to balance precision and recall for the highly imbalanced dataset.
+
+Model evaluation included metrics such as Precision, Recall, F1-score, and AUC-ROC. This approach allowed the model to explicitly capture feature interdependencies, which is beneficial in fraud detection where certain combinations of transaction attributes are more indicative of fraud than individual features alone.
+
+\paragraph{Fuzzy C-Means Clustering}
+Fuzzy C-Means (FCM) is a soft clustering algorithm where each data point belongs to multiple clusters with varying degrees of membership. This is useful for fraud detection, as fraudulent patterns may overlap with legitimate transactions. 
+
+We implemented FCM from scratch, initializing a random membership matrix and iteratively updating cluster centers and memberships until convergence, using a fuzziness parameter $m=2.0$. The dataset was preprocessed by filling missing values, scaling \texttt{Time} and \texttt{Amount}, and sampling all fraud cases with a balanced subset of non-fraud cases. PCA was applied for visualization.
+
+Anomaly scores were computed as $1 - \max(\text{membership values})$, with the classification threshold chosen via Youden’s J statistic from the ROC curve. Model performance was evaluated using AUC, Precision, Recall, and F1-score, alongside cluster quality metrics such as Silhouette Score, Calinski–Harabasz Index, and Davies–Bouldin Index.
+
+
+\paragraph{Genetic Algorithm Optimization}
+We employed a Genetic Algorithm (GA) to jointly optimize feature selection and hyperparameters for a Gradient Boosting Classifier (GBC). The GA operates on individuals encoding both a binary mask for feature inclusion and continuous values for hyperparameters (\textit{learning rate}, \textit{max depth}, \textit{subsample}, and \textit{min samples split}). 
+
+A population of size 15 was evolved over 8 generations using two-point crossover, bit-flip mutation, and tournament selection. The fitness function was defined as the mean AUC score over 3-fold stratified cross-validation on a small subset of the training data to reduce computation time. 
+
+The best individual from GA optimization was then retrained on the full training set and evaluated on the test set. This approach yielded an optimal subset of features and tuned hyperparameters, aiming to improve fraud detection performance while reducing model complexity.
+
+
+
+
+
 \section{Results}
 
 We evaluated each method using standard metrics including precision, recall, and F1-score. Table \ref{tab:results} summarizes the performance of our models and compares them to the results reported by Tiwari et al. \cite{tiwari2021credit}.
@@ -166,6 +191,12 @@ Training with smaller batch sizes introduces more gradient noise, leading to les
         Recurrent Neural Network & European Dataset & SMOTE & 0.85 & 0.90 & 0.81 \\
         K-Nearest Neighbors & European Dataset & Original & 0.75 & 0.80 & 0.71 \\
         Decision Tree & European Dataset & SMOTE & 0.76 & 0.76 & 0.76 \\
+        Bayesian Belief Network & European Dataset & Original & 0.82 & 0.77 & 0.91 \\
+        Convolutional Neural Network & S-FFSD Dataset & Original & 0.68 & 0.66 & 0.7 \\
+        Fuzzy Clustering & European Dataset & Original & 0.61 & 0.59 & 0.82 \\
+        Genetic Algorithm & European Dataset & Original & 0.51 & 0.5 & 0.52 \\
+
+
         \bottomrule
     \end{tabular}
     \caption{Performance of reproduced models on the credit card fraud detection task.}
@@ -174,7 +205,6 @@ Training with smaller batch sizes introduces more gradient noise, leading to les
 
 
 
-% Analyzing the findings
 \section*{Discussion}
 
 Across all methods, \textbf{Logistic Regression} and \textbf{Support Vector Machine (SVM)} on the original European dataset achieved the highest overall performance, with F1-scores of 0.87 and 0.86, respectively. Logistic Regression exhibited the highest precision (0.93), while SVM provided a slightly more balanced precision–recall trade-off (0.88/0.84).
@@ -183,18 +213,16 @@ Ensemble methods such as \textbf{Random Forest} and \textbf{Bagging Classifier} 
 
 Neural models showed greater variability. The \textbf{Recurrent Neural Network (RNN)} with SMOTE augmentation achieved competitive performance (F1 = 0.85, precision = 0.90, recall = 0.81), surpassing the feedforward \textbf{Neural Network} with SMOTE (F1 = 0.70), which prioritized recall (0.78) at the expense of precision (0.63).
 
-\textbf{K-Nearest Neighbors (KNN)} yielded the lowest scores (F1 = 0.75), reflecting limited capacity to capture complex patterns in the data.
+\textbf{Genetic Algorithm Optimization} yielded the lowest scores (F1 = 0.51), reflecting limited capacity to capture complex patterns in the data.
 
 Overall, results indicate that linear/kernel-based models and SMOTE-augmented RNNs are most effective for this dataset, while ensemble methods may require tuning to improve recall.
 
 
-% Summarizing the key points
 \section*{Conclusion}
 
 This study demonstrates that Logistic Regression and Support Vector Machine achieve the best balance of precision and recall on the European dataset. Additionally, SMOTE-augmented Recurrent Neural Networks provide competitive performance, suggesting that combining data augmentation with advanced models can effectively address class imbalance. Future work should focus on optimizing ensemble methods to improve recall without sacrificing precision.
 
 
-% Setting up the bibliography
 \bibliographystyle{plain}
 \bibliography{references}
 
